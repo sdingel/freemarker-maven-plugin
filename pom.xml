@@ -86,6 +86,7 @@
 							<showErrors>true</showErrors>
 						</configuration>
 						<goals>
+							<goal>install</goal>
 							<goal>run</goal>
 						</goals>
 					</execution>
