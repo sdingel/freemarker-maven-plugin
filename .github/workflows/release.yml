@@ -1,11 +1,8 @@
-name: Build
+name: Release
 
 on:
-    push:
+    workflow_dispatch:
         branches: [ main ]
-    pull_request:
-        branches: [ main ]
-    workflow_dispatch: {}
 
 jobs:
     build:
