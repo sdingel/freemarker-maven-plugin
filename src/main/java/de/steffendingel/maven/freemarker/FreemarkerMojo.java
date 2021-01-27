@@ -25,6 +25,7 @@ import javax.json.JsonValue;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.shared.model.fileset.FileSet;
@@ -34,77 +35,83 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 
-@Mojo(name = "freemarker")
+/**
+ * Apply a FreeMarker template to a set of JSON input files, writing one output file for each input file.
+ */
+// Note that the JavaDoc comments for this class and the fields annotated with @Parameter are used to generate Maven plugin help texts.
+@Mojo(name = "freemarker", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class FreemarkerMojo extends AbstractMojo {
 
-	@Parameter(name = "freemarker-version", property = "freemarker.version", defaultValue = "2.3.30")
-	private String freemarkerVersion;
-
-	@Parameter(name = "template-directory", property = "freemarker.template.directory", defaultValue = "src/main/freemarker")
+	/**
+	 * Directory where the FreeMarker templates are located.
+	 */
+	@Parameter(defaultValue = "src/main/freemarker")
 	private File templateDirectory;
 
+	/**
+	 * Name of the FreeMarker template file (including the extension).
+	 */
 	@Parameter(required = true)
 	private String templateName;
-	
-	@Parameter(name = "template-default-encoding", property = "freemarker.template.default.encoding", defaultValue = "UTF-8")
-	private String templateDefaultEncoding;
 
+	/**
+	 * Set of JSON input files (models) for FreeMarker. The path of each file relative to the base directory of the file
+	 * set is used to determine the output file path.
+	 */
 	@Parameter(required = true)
-	private FileSet modelFiles;
+	private FileSet inputFiles;
 
+	/**
+	 * Directory to write the output files to. The output files are written in the same structure as the input files are
+	 * found in the inputFiles file set.
+	 */
 	@Parameter(required = true)
 	private File outputDirectory;
-	
+
+	/**
+	 * File extension of the output file (without the dot).
+	 */
 	@Parameter(required = true)
 	private String outputExtension;
-	
+
+	@Override
 	public void execute() throws MojoExecutionException {
-		
-		getLog().info("Running freemarker ...");
 
 		try {
-			
-			Configuration cfg = new Configuration(Configuration.VERSION_2_3_30); // TODO
-
+			Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
 			cfg.setDirectoryForTemplateLoading(templateDirectory);
-
-			cfg.setDefaultEncoding(templateDefaultEncoding);
-
-			// Sets how errors will appear.
-			// During web page *development* TemplateExceptionHandler.HTML_DEBUG_HANDLER is
-			// better.
+			cfg.setDefaultEncoding(StandardCharsets.UTF_8.name());
 			cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-
-			// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
 			cfg.setLogTemplateExceptions(false);
-
-			// Wrap unchecked exceptions thrown during template processing into
-			// TemplateException-s:
 			cfg.setWrapUncheckedExceptions(true);
-
-			// Do not fall back to higher scopes when reading a null loop variable:
 			cfg.setFallbackOnNullLoopVariable(false);
 
-			getLog().info("Template name: " + templateName);
 			Template template = cfg.getTemplate(templateName);
+			getLog().info("Template: " + templateName);
 
 			Charset outputCharset = StandardCharsets.UTF_8;
 
-			File modelDirectory = new File(modelFiles.getDirectory());
-			for (String modelFileName : new FileSetManager().getIncludedFiles(modelFiles)) {
-				File modelFile = new File(modelDirectory, modelFileName);
-				getLog().info("Reading " + modelFile.getPath());
+			File inputDirectory = new File(inputFiles.getDirectory());
+			for (String inputFileName : new FileSetManager().getIncludedFiles(inputFiles)) {
+
+				// read JSON model
+				File modelFile = new File(inputDirectory, inputFileName);
+				getLog().info("Input:    " + modelFile.getPath());
 				Map<String, Object> dataModel = readJson(modelFile);
+
+				// derive output file name and prepare output directory
 				String modelFileBaseName;
-				int extensionSeparatorPosition = modelFileName.lastIndexOf('.');
+				int extensionSeparatorPosition = inputFileName.lastIndexOf('.');
 				if (extensionSeparatorPosition >= 0) {
-					modelFileBaseName =  modelFileName.substring(0, extensionSeparatorPosition);
+					modelFileBaseName = inputFileName.substring(0, extensionSeparatorPosition);
 				} else {
-					modelFileBaseName = modelFileName;
+					modelFileBaseName = inputFileName;
 				}
 				File outputFile = new File(outputDirectory, modelFileBaseName + '.' + outputExtension);
 				outputFile.getParentFile().mkdirs();
-				getLog().info("Writing " + outputFile.getPath());
+
+				// run FreeMarker and write output file
+				getLog().info("Output:   " + outputFile.getPath());
 				try (OutputStream outputStream = new FileOutputStream(outputFile);
 						Writer outputWriter = new OutputStreamWriter(outputStream, outputCharset)) {
 					template.process(dataModel, outputWriter);
