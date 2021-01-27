@@ -25,6 +25,7 @@ import javax.json.JsonValue;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -33,6 +34,7 @@ import org.apache.maven.shared.model.fileset.util.FileSetManager;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 /**
@@ -74,10 +76,15 @@ public class FreemarkerMojo extends AbstractMojo {
 	@Parameter(required = true)
 	private String outputExtension;
 
+	@Parameter(required = true, readonly = true, defaultValue = "${project.basedir}")
+	private File projectBaseDirectory;
+
 	@Override
-	public void execute() throws MojoExecutionException {
+	public void execute() throws MojoFailureException, MojoExecutionException {
 
 		try {
+			String projectBasePath = projectBaseDirectory.getAbsolutePath() + File.separator;
+
 			Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
 			cfg.setDirectoryForTemplateLoading(templateDirectory);
 			cfg.setDefaultEncoding(StandardCharsets.UTF_8.name());
@@ -87,7 +94,7 @@ public class FreemarkerMojo extends AbstractMojo {
 			cfg.setFallbackOnNullLoopVariable(false);
 
 			Template template = cfg.getTemplate(templateName);
-			getLog().info("Template: " + templateName);
+			getLog().info("Template: " + getLogPath(new File(templateDirectory, templateName), projectBasePath));
 
 			Charset outputCharset = StandardCharsets.UTF_8;
 
@@ -96,7 +103,7 @@ public class FreemarkerMojo extends AbstractMojo {
 
 				// read JSON model
 				File modelFile = new File(inputDirectory, inputFileName);
-				getLog().info("Input:    " + modelFile.getPath());
+				getLog().info("Input:    " + getLogPath(modelFile, projectBasePath));
 				Map<String, Object> dataModel = readJson(modelFile);
 
 				// derive output file name and prepare output directory
@@ -111,14 +118,16 @@ public class FreemarkerMojo extends AbstractMojo {
 				outputFile.getParentFile().mkdirs();
 
 				// run FreeMarker and write output file
-				getLog().info("Output:   " + outputFile.getPath());
+				getLog().info("Output:   " + getLogPath(outputFile, projectBasePath));
 				try (OutputStream outputStream = new FileOutputStream(outputFile);
 						Writer outputWriter = new OutputStreamWriter(outputStream, outputCharset)) {
 					template.process(dataModel, outputWriter);
 				}
 			}
+		} catch (TemplateException exc) {
+			throw new MojoFailureException("FreeMarker template processing failed", exc);
 		} catch (Exception exc) {
-			throw new MojoExecutionException("Freemarker template processing failed", exc);
+			throw new MojoExecutionException("Failed to run FreeMarker template engine", exc);
 		}
 	}
 
@@ -159,6 +168,14 @@ public class FreemarkerMojo extends AbstractMojo {
 			map.put(name, jsonValueToObject(value));
 		});
 		return map;
+	}
+
+	private static String getLogPath(File file, String projectBasePath) {
+		String logPath = file.getAbsolutePath();
+		if (logPath.startsWith(projectBasePath)) {
+			logPath = logPath.substring(projectBasePath.length());
+		}
+		return logPath;
 	}
 
 }
