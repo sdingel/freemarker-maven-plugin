@@ -18,7 +18,9 @@ jobs:
            - name: Test GPG installation
              run: gpg --version
            - name: Install GPG secret key
-             run: 'echo ${{secrets.GPG_SECRET_KEY}} | gpg --batch --import'
+             run: 'echo $GPG_SECRET_KEY | gpg --batch --import'
+             env:
+                 GPG_SECRET_KEY: ${{secrets.GPG_SECRET_KEY}}
            - name: List keys
              run: gpg --list-secret-keys
            - name: Set up JDK 1.8
