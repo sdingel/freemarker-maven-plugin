@@ -16,8 +16,7 @@ jobs:
            - name: Checkout source
              uses: actions/checkout@v2
            - name: Install GPG secret key
-             run: 'echo "$SSH_KEY"'
-             shell: bash
+             run: echo $GPG_SECRET_KEY
              env:
                  GPG_SECRET_KEY: ${{secrets.GPG_SECRET_KEY}}
            - name: Set up JDK 1.8
