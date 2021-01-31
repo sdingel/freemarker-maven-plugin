@@ -27,6 +27,10 @@ jobs:
                  server-password: OSSRH_PASSWORD
                  gpg-private-key: ${{secrets.GPG_SECRET_KEY}}
                  gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
+           - name: Configure git user
+             run: |
+                 git config user.email "mail@steffen-dingel.de"
+                 git config user.name "Build workflow on Github ActionsW"
            - name: Build snapshot using Maven
              if: github.event.inputs.maven-action != 'release'
              run: mvn --batch-mode deploy
