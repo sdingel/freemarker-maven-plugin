@@ -22,7 +22,7 @@ jobs:
                  server-id: testossrh
                  server-username: OSSRH_USER
                  server-password: OSSRH_PASSWORD
-                 gpg-private-key: ${{secrets.GPG_PRIVATE_KEY}}
+                 gpg-private-key: ${{secrets.GPG_SECRET_KEY}}
                  gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
            - name: List keys
              run: gpg --list-secret-keys
