@@ -184,7 +184,7 @@
 				<artifactId>maven-release-plugin</artifactId>
 				<version>3.0.0-M1</version>
 				<configuration>
-					<projectVersionPolicyId>maven-release-semver-policy</projectVersionPolicyId>
+					<projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
 				</configuration>
 				<dependencies>
 					<dependency>
