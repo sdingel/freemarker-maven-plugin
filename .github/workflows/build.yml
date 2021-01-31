@@ -10,13 +10,8 @@ on:
         - cron:  '0 6 * * 6'
     workflow_dispatch:
         inputs:
-            profile:
-                description: 'Maven profile to activate'
-                required: true
-                default: 'x'
-            version:
-                description: 'Release version'
-                required: false
+            maven-action:
+                description: 'Type "release" to build a new release, all other values trigger a snapshot build'
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -32,9 +27,18 @@ jobs:
                  server-password: OSSRH_PASSWORD
                  gpg-private-key: ${{secrets.GPG_SECRET_KEY}}
                  gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
-           - name: Build with Maven
-             run: mvn --batch-mode clean deploy
+           - name: Build snapshot using Maven
+             if: github.event.inputs.maven-action != 'release'
+             run: mvn --batch-mode deploy
              env:
                  OSSRH_USER: ${{secrets.OSSRH_USER}}
                  OSSRH_PASSWORD: ${{secrets.OSSRH_PASSWORD}}
                  GPG_SECRET_KEY_PASSPHRASE: ${{secrets.GPG_SECRET_KEY_PASSPHRASE}}
+           - name: Build release using Maven
+             if: github.event.inputs.maven-action == 'release'
+             run: mvn --batch-mode release:prepare release:perform
+             env:
+                 OSSRH_USER: ${{secrets.OSSRH_USER}}
+                 OSSRH_PASSWORD: ${{secrets.OSSRH_PASSWORD}}
+                 GPG_SECRET_KEY_PASSPHRASE: ${{secrets.GPG_SECRET_KEY_PASSPHRASE}}
+                 
