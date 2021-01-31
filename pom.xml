@@ -186,6 +186,13 @@
 				<configuration>
 					<projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.release</groupId>
+						<artifactId>maven-release-semver-policy</artifactId>
+						<version>3.0.0-M1</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 
 			<plugin>
