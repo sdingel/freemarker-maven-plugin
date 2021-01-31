@@ -32,8 +32,8 @@
 
 	<scm>
 		<connection>scm:git:git://github.com/sdingel/freemarker-maven-plugin.git</connection>
-		<developerConnection>scm:git:git://github.com:sdingel/freemarker-maven-plugin.git</developerConnection>
-		<url>http://github.com/sdingel/freemarker-maven-plugin/tree/main</url>
+		<developerConnection>scm:git:git@github.com:sdingel/freemarker-maven-plugin.git</developerConnection>
+		<url>https://github.com/sdingel/freemarker-maven-plugin</url>
 		<tag>HEAD</tag>
 	</scm>
 
