@@ -18,6 +18,8 @@ jobs:
         steps:
            - name: Checkout source
              uses: actions/checkout@v2
+             with:
+                 token: ${{ secrets.GITHUB_TOKEN }}
            - name: Set up JDK 1.8
              uses: actions/setup-java@v1
              with:
@@ -28,9 +30,10 @@ jobs:
                  gpg-private-key: ${{secrets.GPG_SECRET_KEY}}
                  gpg-passphrase: GPG_SECRET_KEY_PASSPHRASE
            - name: Configure git user
+             if: github.event.inputs.maven-action == 'release'
              run: |
                  git config user.email "mail@steffen-dingel.de"
-                 git config user.name "Build workflow on Github ActionsW"
+                 git config user.name "Build workflow on Github Actions"
            - name: Build snapshot using Maven
              if: github.event.inputs.maven-action != 'release'
              run: mvn --batch-mode deploy
