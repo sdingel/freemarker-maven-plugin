@@ -28,6 +28,10 @@ jobs:
                  server-password: ossrhpassword
                  gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
                  gpg-passphrase: ${{secrets.GPG_SECRET_KEY_PASSPHRASE}}
+           - name: Show env
+             run: env
+           - name: Show Maven setting
+             run: cat /home/runner/.m2/settings.xml
            - name: Build with Maven
              run: mvn --batch-mode -Dgpg.passphrase=$GPG_SECRET_KEY_PASSPHRASE clean install
              env:
