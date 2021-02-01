@@ -22,6 +22,7 @@ jobs:
              uses: actions/setup-java@v1
              with:
                  java-version: 8
+                 gpg-private-key: ${{secrets.GPG_SECRET_KEY}}
            - name: Configure Maven
              run: cp .github/configuration/settings.xml /home/runner/.m2/
            - name: Configure git user
