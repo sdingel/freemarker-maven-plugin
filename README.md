@@ -47,11 +47,10 @@ To use the plugin, place the following `plugin` element into your `pom.xml` unde
 </project>
 ```
 
-Currently, the plugin supports only one goal `freemarker:freemarker` applies a FreeMarker template to a set of JSON input files, writing one output file for each input file. By default, this goal binds to the Maven lifecylce phase `generate-resources`.
+Currently, the plugin supports only one goal `freemarker:freemarker` which applies a FreeMarker template to a set of JSON input files, writing one output file for each input file. By default, this goal binds to the Maven lifecylce phase `generate-resources`.
 
 The goal supports the following configuration parameters:
-* `inputFiles` (required): Set of JSON input files (models) for FreeMarker. The path of each file relative to the base directory of the file set is used to determine the output file path.
+* `templateDirectory` (optional, default is `${project.basedir}/src/main/freemarker`): Directory where the FreeMarker templates are located.
+* `templateName` (required): Name of the FreeMarker template file (including the extension).* `inputFiles` (required): Set of JSON input files (models) for FreeMarker. The path of each file relative to the base directory of the file set is used to determine the output file path.
 * `outputDirectory` (required): Directory to write the output files to. The output files are written in the same structure as the input files are found in the `inputFiles` file set.
 * `outputExtension` (required): File extension of the output file (without the dot).
-* `templateDirectory` (optional, default is `src/main/freemarker`): Directory where the FreeMarker templates are located.
-* `templateName` (required): Name of the FreeMarker template file (including the extension).
