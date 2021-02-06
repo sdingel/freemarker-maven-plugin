@@ -28,6 +28,7 @@
 							<goal>freemarker</goal>
 						</goals>
 						<configuration>
+							<templateDirectory>${project.basedir}/src/main/freemarker</templateDirectory>
 							<templateName>simple-template.ftl</templateName>
 							<inputFiles>
 								<directory>${project.basedir}/src/main/model</directory>
