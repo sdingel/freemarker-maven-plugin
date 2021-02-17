@@ -63,7 +63,7 @@ public class FreemarkerMojo extends AbstractMojo {
 	/**
 	 * Directory where the FreeMarker templates are located.
 	 */
-	@Parameter(defaultValue = "src/main/freemarker")
+	@Parameter(defaultValue = "${project.basedir}/src/main/freemarker")
 	private File templateDirectory;
 
 	/**
